@@ -1,32 +1,20 @@
 #!/usr/bin/env bash
-
-# Exit immediately if a command exits with a non-zero status
 set -e
 
-echo "========================================="
-echo "   Building janalyze in Release Mode     "
-echo "========================================="
+echo "Downloading the latest release of janalyze..."
 
-# 1. Compile the optimized release binary
-cargo build --release
+# GitHub automatically redirects 'latest' to the newest uploaded binary
+DOWNLOAD_URL="https://github.com/balint0513/janalyze/releases/latest/download/janalyze"
 
-echo ""
-echo "========================================="
-echo "   Installing system-wide (/usr/local/bin) "
-echo "========================================="
+# Download the file to a temporary directory
+curl -sSL -o /tmp/janalyze "$DOWNLOAD_URL"
 
-# 2. Check if we have root privileges to write to /usr/local/bin
-if [ "$EUID" -ne 0 ]; then
-    echo "Elevated permissions required to install to /usr/local/bin."
-    echo "Switching to sudo..."
-    sudo cp target/release/janalyze /usr/local/bin/
-else
-    cp target/release/janalyze /usr/local/bin/
-fi
+echo "Installing to /usr/local/bin (this requires sudo privileges)..."
 
-# 3. Ensure the binary has executable permissions
+# Move it to the universal path and make it executable
+sudo mv /tmp/janalyze /usr/local/bin/janalyze
 sudo chmod +x /usr/local/bin/janalyze
 
 echo ""
-echo "Success! janalyze has been installed for all users."
-echo "You can now run 'janalyze help' anywhere."
+echo "Success! janalyze is installed."
+echo "Type 'janalyze help' to get started."
