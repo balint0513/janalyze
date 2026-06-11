@@ -55,7 +55,7 @@ fn print_help() {
 
 
 fn scan(path: &Path) {
-    let mut total_size: u32 = 0;
+    let mut total_size: u64 = 0;
 
     println!("Scanning directory: {}", path.display());   
     println!("{}", check_project_type(path)
@@ -70,7 +70,7 @@ fn scan(path: &Path) {
 
     for target in &targets {
         let size = calculate_dir_size(target);
-        total_size += size as u32;
+        total_size += size;
     }
 
     if !targets.is_empty() {
@@ -97,10 +97,14 @@ fn recursive_scan(path: &Path) {
         if let Ok(entry) = entry {
             let entry_path = entry.path();
             if entry.file_type().is_dir() && check_project_type(entry_path).is_some() {
-                    scan(entry_path);
-                    it.skip_current_dir();
-                    let size = calculate_dir_size(entry_path);
-                    total_size += size;
+                if let Some(rule) = check_project_type(entry_path) {
+                    let targets = find_cleanup_targets(entry_path, rule);
+                    for target in &targets {
+                        total_size += calculate_dir_size(target);
+                    }
+                }
+                scan(entry_path);
+                it.skip_current_dir();
             }
         }
     }
@@ -167,10 +171,14 @@ fn recursive_clean(path: &Path) {
         if let Ok(entry) = entry {
             let entry_path = entry.path();
             if entry.file_type().is_dir() && check_project_type(entry_path).is_some() {
+                    if let Some(rule) = check_project_type(entry_path) {
+                        let targets = find_cleanup_targets(entry_path, rule);
+                        for target in &targets {
+                            total_size += calculate_dir_size(target);
+                        }
+                    }
                     clean(entry_path);
                     it.skip_current_dir();
-                    let size = calculate_dir_size(entry_path);
-                    total_size += size;
             }
         }
     }
