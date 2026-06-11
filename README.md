@@ -43,11 +43,15 @@ Installation
 ------------
 
 To build from source, ensure you have Rust installed. Then run:
-
+```console
   cargo build --release
-
+```
 The compiled binary will be available in target/release/janalyze
 
+Or if you want a hands-free experience, run the script 
+```console
+curl -sSL https://raw.githubusercontent.com/balint0513/janalyze/main/install_script.sh | bash
+```
 Usage
 -----
 
